@@ -1,5 +1,5 @@
-FROM alpine:3.19 as builder
-MAINTAINER Arne Neumann <nlpbox.programming@arne.cl>
+FROM alpine:3.19 AS builder
+LABEL org.opencontainers.image.authors="Arne Neumann <nlpbox.programming@arne.cl>"
 
 RUN apk update && apk add py3-pip wget
 
@@ -33,14 +33,18 @@ COPY --from=builder /opt/corenlp .
 
 ADD test_api.py .
 
-ENV JAVA_XMX 4g
-ENV ANNOTATORS tokenize,ssplit,pos,lemma,ner,depparse,coref,natlog,openie,parse
-ENV TIMEOUT_MILLISECONDS 15000
+ENV JAVA_XMX=4g
+ENV ANNOTATORS=tokenize,truecase,ssplit,pos,lemma,ner,depparse,coref,natlog,openie,parse
+ENV TIMEOUT_MILLISECONDS=15000
 
-ENV PORT 9000
+ENV PORT=9000
 
 EXPOSE $PORT
 
-
-CMD java -Xmx$JAVA_XMX -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -annotators "$ANNOTATORS" -port $PORT -timeout $TIMEOUT_MILLISECONDS
-
+CMD ["java", \
+     "-Xmx$JAVA_XMX", \
+     "-cp", "*", \
+     "edu.stanford.nlp.pipeline.StanfordCoreNLPServer", \
+     "-annotators", "$ANNOTATORS", \
+     "-port", "$PORT", \
+     "-timeout", "$TIMEOUT_MILLISECONDS"]
